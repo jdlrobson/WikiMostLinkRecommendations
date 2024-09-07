@@ -76,6 +76,16 @@ const getMostLinked = ( pages ) => {
       })
 };
 
+const getMoreLike = ( pages ) => {
+  return api.moreLike( pages ).then((pages) => {
+        if ( pages.length ) {
+          return Promise.all(
+            pages.slice(0, 3).map((t) => loadSummary(t.title))
+          )
+        }
+      })
+}
+
 export default defineComponent({
   components: {
     CdxTextInput,
@@ -97,7 +107,7 @@ export default defineComponent({
               // a newer query exists.
               return;
             }
-            api.moreLike(allPages).then((pages3) => {
+            getMoreLike(allPages).then((pages3) => {
               this.pages = pages;
               this.pages2 = pages2;
               this.pages3 = pages3;
