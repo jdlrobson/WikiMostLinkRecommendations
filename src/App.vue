@@ -21,7 +21,9 @@
       <page-list :pages="pages"></page-list>
       <h2>algorithm 2</h2>
       <page-list :pages="pages2"></page-list>
-      </div>
+      <h2>algorithm 3</h2>
+      <page-list :pages="pages3"></page-list>
+    </div>
   </div>
 </template>
 
@@ -35,6 +37,7 @@ import {
 import { defineComponent, ref } from 'vue';
 let pages = ref([]);
 let pages2 = ref([]);
+let pages3 = ref([]);
 const query = ref( '' );
 
 const mwApiToCodexData = ( data ) => {
@@ -88,13 +91,17 @@ export default defineComponent({
         }
         getMostLinked( [ query, query ] ).then( (pages) => {
         if ( pages && pages.length ) {
-          getMostLinked( [ query ].concat( pages.map((p) => p.title) ) ).then( ( pages2 ) => {
+          const allPages =  [ query ].concat( pages.map((p) => p.title) );
+          getMostLinked( allPages ).then( ( pages2 ) => {
             if ( this.query !== query ) {
               // a newer query exists.
               return;
             }
-            this.pages = pages;
-            this.pages2 = pages2;
+            api.moreLike(allPages).then((pages3) => {
+              this.pages = pages;
+              this.pages2 = pages2;
+              this.pages3 = pages3;
+            })
           })
         }
       } );
@@ -108,7 +115,8 @@ export default defineComponent({
       selected: null,
       query,
       pages,
-      pages2
+      pages2,
+      pages3
     };
   },
 });
