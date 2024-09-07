@@ -95,27 +95,35 @@ export default defineComponent({
   methods: {
     updateCards() {
       const query = this.query;
-      loadSummary( query ).then( ( page ) => {
-        if ( page) {
-          this.selected = page;
-        }
-        getMostLinked( [ query, query ] ).then( (pages) => {
-        if ( pages && pages.length ) {
-          const allPages =  [ query ].concat( pages.map((p) => p.title) );
-          getMostLinked( allPages ).then( ( pages2 ) => {
-            if ( this.query !== query ) {
-              // a newer query exists.
-              return;
+
+      this.pages = [];
+      this.pages2 = [];
+      this.pages3 = [];
+      this.selected = null;
+      clearTimeout(this.to);
+      this.to = setTimeout(() => {
+        loadSummary( query ).then( ( page ) => {
+          if ( page) {
+            this.selected = page;
+          }
+          getMostLinked( [ query, query ] ).then( (pages) => {
+            if ( pages && pages.length ) {
+              const allPages =  [ query ].concat( pages.map((p) => p.title) );
+              getMostLinked( allPages ).then( ( pages2 ) => {
+                if ( this.query !== query ) {
+                  // a newer query exists.
+                  return;
+                }
+                getMoreLike(allPages).then((pages3) => {
+                  this.pages = pages;
+                  this.pages2 = pages2;
+                  this.pages3 = pages3;
+                })
+              })
             }
-            getMoreLike(allPages).then((pages3) => {
-              this.pages = pages;
-              this.pages2 = pages2;
-              this.pages3 = pages3;
-            })
-          })
-        }
-      } );
-      } );
+          } );
+        } );
+      }, 300 );
     }
   },
   setup( props ) {
@@ -124,6 +132,7 @@ export default defineComponent({
     return {
       selected: null,
       query,
+      to: null,
       pages,
       pages2,
       pages3
